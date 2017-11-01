@@ -1,0 +1,214 @@
+<html>
+<head>
+  <title>FBLA Sewanhaka</title>
+  <link rel="stylesheet" type="text/css" href="game.css">
+  <style>
+  canvas {
+      border:1px solid #d3d3d3;
+      background-color: black;
+      padding: 0;
+      margin: auto;
+      display: block;
+    }
+  body {
+    background-image: url("bgimage.jpg");
+    }
+p {
+  color: white;
+  font-size: 25px;
+  font-family: "Consolas";
+  text-align: center;
+}
+  </style>
+  <script>
+    var myGamePiece;
+    var allienc;
+    var alien = [];
+    var balien = [];
+    var ufo = [];
+    var aliencount = 3;
+    var end;
+    var score;
+    var finalscore;
+    var playagain;
+    function startGame() {
+        myGamePiece = new component(50, 50, "spaceship.png", 450, 500, "image");
+        allienc = new component("15px", "Consolas", "white", 725, 30, "text");
+        score = new component("15px", "Consolas", "white", 725, 60, "text");
+        end = new component("30px", "Consolas", "white", 350, 200, "text");
+        finalscore = new component("30px", "Consolas", "white", 300, 240, "text");
+        playagain = new component("30px", "Consolas", "white", 300, 280, "text");
+        myGameArea.start();
+        /* myObstacle = new component(20, 20, "blue", 300, 0); */
+    }
+    var myGameArea = {
+        canvas : document.createElement("canvas"),
+        start : function() {
+            this.canvas.width = 900;
+            this.canvas.height = 600;
+            this.context = this.canvas.getContext("2d");
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            this.frameNo = 0;
+/*checks if a key is pressed. when key is not pressed, "key" is set to false*/
+              window.addEventListener('keydown', function (e) { /* sets keyboard as controller */
+                  myGameArea.key = e.keyCode;
+              })
+              window.addEventListener('keyup', function (e) { /* doesnt move when key isn't pressed */
+                  myGameArea.key = false;
+              })
+              this.interval = setInterval(updateGameArea, 20); /*updates display
+              every 20th millisecond aka 50 times per second*/
+              },
+              clear : function() {
+                  this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+              },
+              stop : function() {
+                  clearInterval(this.interval);
+
+              }
+          }
+/*end of key pressed defining*/
+    function everyinterval(n) {
+        if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+        return false;
+    }
+/*appearance and movement of sprite*/
+    function component(width, height, color, x, y, type) {
+      this.type = type;
+    if (type == "image") { /*both if statements about image type is necessary*/
+        this.image = new Image();
+        this.image.src = color;
+    }
+      this.gamearea = myGameArea;
+      this.width = width;
+      this.height = height;
+      this.speedX = 0;
+      this.speedY = 0;
+      this.x = x;
+      this.y = y;
+      this.update = function() {
+        ctx = myGameArea.context;
+        if (type == "image") {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+        else if (this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = color;
+            ctx.fillText(this.text, this.x, this.y);
+        }
+        else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+          /*speed is changing by 1 per movement*/
+      this.newPos = function() {
+          this.x += this.speedX; /* this.x = this.x + this.speedx */
+          this.y += this.speedY;
+      }
+      this.crashWith = function(otherobj) {
+        var myleft = this.x;
+        var myright = this.x + (this.width);
+        var mytop = this.y;
+        var mybottom = this.y + (this.height);
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + (otherobj.width);
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + (otherobj.height);
+        var crash = true;
+        if ((mybottom < othertop) ||
+               (mytop > otherbottom) ||
+               (myright < otherleft) ||
+               (myleft > otherright)) {
+           crash = false;
+        }
+        return crash;
+    }
+  }
+      /*movement of sprite*/
+      function updateGameArea() {
+      var x, y;
+      myGameArea.clear();
+      myGameArea.frameNo += 1;
+      if (myGameArea.frameNo == 1 || everyinterval(75)) { /*OBSTACLE movement*/
+            x = Math.floor((Math.random() * 875) + 1); /*sets x to random digit between 1 - 900*/
+            y = 0; /*falling obstacles will start from top and continute to bottom*/
+            alien.push(new component(35, 35, "alien.png", x, y, "image"));
+
+          }
+          if (myGameArea.frameNo == 1 || everyinterval(100)) {
+            x = Math.floor((Math.random() * 875) + 1); /*sets x to random digit between 1 - 900*/
+            y = 0;
+            balien.push(new component(35, 35, "alien2.png", x, y, "image"));
+          }
+          if (myGameArea.frameNo == 500 || everyinterval(500)) {
+            x = Math.floor((Math.random() * 875) + 1); /*sets x to random digit between 1 - 900*/
+            y = 0;
+            ufo.push(new component(40, 35, "ufo.png", x, y, "image"));
+          }
+        for (i = 0; i < alien.length; i += 1) {
+            alien[i].y += 2; /*soeed of obstacles - adds 2 to y value*/
+            alien[i].update();
+            if (alien[i].y == myGamePiece.y) {
+              if (alien[i].x <= myGamePiece.x + 10 && alien[i].x >= myGamePiece.x - 10) {
+              aliencount += 1;
+              aliencount.update();
+            }
+            }
+        }
+        for (i = 0; i < balien.length; i += 1) {
+            balien[i].y += 2; /*soeed of obstacles - adds 2 to y value*/
+            balien[i].update();
+            if (balien[i].y == myGamePiece.y) {
+              if (balien[i].x <= myGamePiece.x + 10 && balien[i].x >= myGamePiece.x - 10) {
+              aliencount -= 1;
+              aliencount.update();
+            }
+          }
+        }
+        for (i = 0; i < ufo.length; i += 1) {
+            ufo[i].y += 4; /*soeed of obstacles - adds 2 to y value*/
+            ufo[i].update();
+            if (ufo[i].y == myGamePiece.y) {
+              if (ufo[i].x <= myGamePiece.x + 10 && ufo[i].x >= myGamePiece.x - 10) {
+              aliencount += 5;
+              aliencount.update();
+            }
+          }
+        }
+      myGamePiece.speedX = 0;
+      myGamePiece.speedY = 0;
+      if (myGameArea.key && myGameArea.key == 37) {myGamePiece.speedX = -3; }
+      if (myGameArea.key && myGameArea.key == 39) {myGamePiece.speedX = 3; }
+
+      if (myGameArea.key && myGameArea.key == 27) { /* stops when esc is pressed */
+        myGameArea.stop();
+      }
+      if (aliencount < 1) {
+        myGameArea.stop();
+        end.text = "GAME OVER";
+        end.update();
+        finalscore.text = "FINAL SCORE: " + myGameArea.frameNo;
+        finalscore.update();
+      }
+      allienc.text="ALIEN COUNT: " + aliencount;
+      allienc.update();
+      score.text="SCORE: " + myGameArea.frameNo;
+      score.update();
+      myGamePiece.newPos();
+      myGamePiece.update();
+  }
+  </script>
+</head>
+<body onload="startGame()">
+  <p>
+  The Galaxy needs your help! Capture as many green aliens as you can to increase your alien count by 1,
+  but be careful - if you catch a purple alien your alien count descreases by one.
+  The UFOs increase your alien count by 5.<br>
+  TO move your spaceship, use the left and right arrows.<br>
+  The game starts with an alien count of 3. Your alien count will act as your lives.
+  The game ends when you have an alien count of 0. The longer you last in the game, the higher your score.<br>
+  Good Luck!
+</p>
+</body>
+</html>
